@@ -162,14 +162,21 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
   static const speedFactor=.35;
   int offset=0;
   double currentScroll = 0;
+  bool readOffset=false;
 
   void restoreScrollPosition() {
-    Future.delayed(Duration(milliseconds: 50), () async {
-      final ii = await getImageDimensions(image);
+    Future.delayed(Duration(milliseconds: 150), () async {
+      final ii = await getImageDimensions('assets/P${images[currentImageIndex]}.png');
+
 
       if (scrollController.hasClients){
-        currentScroll= (offset==0)?currentScroll:scrollController.position.maxScrollExtent/ii.height*660*offset;
+        // print("++++++++++++++++$offset");
+        // print("---------------------------------${scrollController.position.maxScrollExtent}");
+        // print("////////////////////////////////////////${ii.height}");
+        currentScroll= (readOffset==false)?currentScroll:scrollController.position.maxScrollExtent*660*offset/ii.height/*+75*(offset*1.19)*/;
+        // print("---------------------------------${currentScroll}");
 
+        readOffset=false;
         scrollController.jumpTo(currentScroll);
         offset=0;
       }
@@ -178,11 +185,13 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
 
   void toggleScrolling() {
     isScrolling = !isScrolling;
+    print(scrollController.offset);
+    updateScroll();
     if (isScrolling) {
       startScrolling();
     } else {
       _scrollTimer?.cancel();
-    }    updateScroll();
+    }
 
     emit(ScrollingImageState());
   }
@@ -233,6 +242,7 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
   void updateScroll() {
     if (scrollController.hasClients) {
       currentScroll = scrollController.offset;
+      readOffset=false;
     }
   }
 
@@ -307,6 +317,7 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
       Map<String ,int> myMap=pageBlock(inputPage);
       index = myMap["pageIndex"];
       offset=myMap["offset"]!;
+      readOffset=true;
     }
 
     if (index != -1&&index!=null) {
@@ -320,6 +331,7 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
 
   void nextImage() {
     currentScroll=0;
+    readOffset=false;
     offset=0;
     isScrolling=false;
     currentImageIndex= (currentImageIndex + 1) % images.length;
@@ -329,6 +341,7 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
 
   void lastImage() {
     currentScroll=0;
+    readOffset=false;
     offset=0;
     isScrolling=false;
     int newIndex = currentImageIndex - 1;
