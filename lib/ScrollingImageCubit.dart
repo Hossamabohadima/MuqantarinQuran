@@ -160,7 +160,6 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
   double scrollSpeed = 0;
   int currentImageIndex = 0;
   static const speedFactor=.35;
-  //int pageHeight = 1020; //1684
   int offset=0;
   double currentScroll = 0;
 

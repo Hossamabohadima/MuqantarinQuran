@@ -13,7 +13,9 @@ class ScrollingImageScreen extends StatelessWidget {
           final cubit = context.read<ScrollingImageCubit>();
           final image = cubit.image;
           cubit.startScrolling();
-          Widget  ccc=Scaffold(
+
+
+          return Scaffold(
               body: GestureDetector(
                 child: OrientationBuilder(
                   builder: (context, orientation) {
@@ -46,26 +48,31 @@ class ScrollingImageScreen extends StatelessWidget {
                           child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
-                              ElevatedButton(
+                              (orientation != Orientation.portrait)?ElevatedButton(
                                 onPressed: () => cubit.nextImage(),
                                 child: const Icon(Icons.arrow_left),
-                              ),
-                              Slider(
-                                value: cubit.scrollSpeed,
-                                min: 0,
-                                max: 10,
-                                divisions: 10,
-                                label: cubit.scrollSpeed.round().toString(),
+                              ):SizedBox.shrink(),
+                              DropdownButton<int>(
+                                value: cubit.scrollSpeed.round(),
                                 onChanged: (value) {
-                                  cubit.updateScrollSpeed(value);
+                                  if (value != null) {
+                                    cubit.updateScrollSpeed(value.toDouble());
+                                  }
                                 },
+                                items: List.generate(
+                                  11, // values from 0 to 10
+                                      (index) => DropdownMenuItem(
+                                    value: index,
+                                    child: Text(index.toString()),
+                                  ),
+                                ),
                               ),
-                              ElevatedButton(
+                              (orientation != Orientation.portrait)?ElevatedButton(
                                 onPressed: () {
                                   cubit.toggleScrolling(); // Toggle play/pause
                                 },
                                 child: Icon(cubit.isScrolling ? Icons.pause : Icons.play_arrow,color: Colors.blue,), // Change icon based on state
-                              ),
+                              ):SizedBox.shrink(),
                               SizedBox(
                                 width: 200,
                                 child: TextField(
@@ -79,6 +86,30 @@ class ScrollingImageScreen extends StatelessWidget {
                                   },
                                 ),
                               ),
+                              (orientation != Orientation.portrait)? ElevatedButton(
+
+                                onPressed: () => cubit.lastImage(),
+                                child: const Icon(Icons.arrow_right),
+                              ):SizedBox.shrink(),
+                            ],
+                          ),
+                        ),
+                        (orientation == Orientation.portrait)? Padding(
+                          padding: const EdgeInsets.all(8.0),
+                          child: Row(
+                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                            children: [
+                              ElevatedButton(
+                                onPressed: () => cubit.nextImage(),
+                                child: const Icon(Icons.arrow_left),
+                              ),
+
+                              ElevatedButton(
+                                onPressed: () {
+                                  cubit.toggleScrolling(); // Toggle play/pause
+                                },
+                                child: Icon(cubit.isScrolling ? Icons.pause : Icons.play_arrow,color: Colors.blue,), // Change icon based on state
+                              ),
                               ElevatedButton(
 
                                 onPressed: () => cubit.lastImage(),
@@ -86,17 +117,13 @@ class ScrollingImageScreen extends StatelessWidget {
                               ),
                             ],
                           ),
-                        ),
+                        ):SizedBox.shrink(),
                       ],
                     );
                     // }
                   },
                 ),
               ));
-          //print("hhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhhh");
-          // print(cubit.scrollController.position.maxScrollExtent);
-          // cubit.printImageHeight();
-          return ccc;
         },
       ),
     );
