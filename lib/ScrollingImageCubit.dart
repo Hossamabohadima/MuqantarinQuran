@@ -5,33 +5,131 @@ import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 
-
 class ScrollingImageCubit extends Cubit<ScrollingImageState> {
-  ScrollingImageCubit()
-      : super(ScrollingImageState());
+  ScrollingImageCubit() : super(ScrollingImageState());
 
-/*
-  List<String> images = [
-    "P1", "P12", "P23", "P32", "P41", "P50", "P60", "P70", "P77", "P87", "P97",
-    "P106", "P117", "P128", "P140", "P152", "P164", "P177", "P187", "P198",
-    "P208", "P215", "P222", "P235", "P249", "P255", "P267", "P274", "P282",
-    "A1", "A2", "A3", "A4", "A5", "A6", "A7", "A8",
-    "B1", "B2", "B3", "B4", "B5", "B6", "B7", "B8",
-    "C1", "C2", "C3", "C4", "C5", "C6", "C7", "C8", "C9", "C10", "C11", "C12",
-    "D1", "D2", "D3", "D4", "D5", "D6", "D7", "D8", "D9", "D10"
+  List<int> images = [
+    1,
+    12,
+    23,
+    32,
+    41,
+    50,
+    60,
+    70,
+    77,
+    87,
+    97,
+    106,
+    117,
+    128,
+    140,
+    151,
+    164,
+    177,
+    187,
+    198,
+    208,
+    215,
+    222,
+    235,
+    249,
+    255,
+    267,
+    274,
+    282,
+    293,
+    305,
+    312,
+    322,
+    332,
+    342,
+    350,
+    360,
+    367,
+    377,
+    385,
+    396,
+    404,
+    415,
+    421,
+    428,
+    434,
+    440,
+    446,
+    453,
+    458,
+    467,
+    477,
+    483,
+    489,
+    496,
+    507,
+    515,
+    523,
+    534,
+    545,
+    553,
+    562,
+    570,
+    578,
+    590,
+    597,
+    602
   ];
-*/
-
-  List<int> images =[1,12,23,32,41,50,60,70,77,87,97,106,117,128,140,151,164,177,187,198,208,215,222,235,249,255,267,274,282,293,305,312,322,332,342,350,360,367,377,385,396,404,415,421,428,434,440,446,453,458,467,477,483,489,496,507,515,523,534,545,553,562,570,578,590,597,602];
 
   Map<String, int> muqantarinStart = {
-    "A1": 293, "A2": 305, "A3": 312, "A4": 322, "A5": 332, "A6": 342,
-    "E2": 562, "E3": 570, "B1": 350, "B2": 360, "B3": 367, "B4": 377,
-    "B5": 385, "B6": 396, "B7": 404, "E4": 578, "C1": 415, "C2": 421,
-    "C3": 428, "C4": 434, "C5": 440, "C6": 446, "C7": 453, "C8": 458,
-    "C9": 467, "C10": 477, "E5": 590, "E6": 597, "D1": 483, "D2": 489,
-    "D3": 496, "D4": 507, "D5": 515, "D6": 523, "D7": 534, "D8": 545,
-    "D9": 553, "E7": 602, "E1": 560
+    "A1": 293,
+    "A2": 305,
+    "A3": 312,
+    "A4": 322,
+    "A5": 332,
+    "A6": 342,
+    "A7":562,
+    "A8":570,
+
+    "B1": 350,
+    "B2": 360,
+    "B3": 367,
+    "B4": 377,
+    "B5": 385,
+    "B6": 396,
+    "B7": 404,
+    "B8":578,
+
+    "C1": 415,
+    "C2": 421,
+    "C3": 428,
+    "C4": 434,
+    "C5": 440,
+    "C6": 446,
+    "C7": 453,
+    "C8": 458,
+    "C9": 467,
+    "C10": 477,
+    "C11":590,
+    "C12":597,
+
+    "D1": 483,
+    "D2": 489,
+    "D3": 496,
+    "D4": 507,
+    "D5": 515,
+    "D6": 523,
+    "D7": 534,
+    "D8": 545,
+    "D9": 553,
+    "D10":602,
+
+    "E1": 560,
+    "E2": 562,
+    "E3": 570,
+    "E4": 578,
+    "E5": 590,
+    "E6": 597,
+    "E7": 602,
+
+
   };
 
   Map<String, int> suraMap = {
@@ -151,7 +249,6 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
     "الناس": 604,
   };
 
-
   String get image => 'assets/P${images[currentImageIndex]}.png';
   final textController = TextEditingController();
   final ScrollController scrollController = ScrollController();
@@ -159,33 +256,47 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
   bool isScrolling = false;
   double scrollSpeed = 0;
   int currentImageIndex = 0;
-  static const speedFactor=.35;
-  int offset=0;
+  static const speedFactor = 0.28; //.35;
+  int offset = 0;
   double currentScroll = 0;
-  bool readOffset=false;
+  double speedratio = 1.0;
+  bool readOffset = false;
+  int pageH = 660;
 
   void restoreScrollPosition() {
+//    Future.delayed(Duration(milliseconds: 50), () async {  // using from computer
     Future.delayed(Duration(milliseconds: 150), () async {
-      final ii = await getImageDimensions('assets/P${images[currentImageIndex]}.png');
+      // using from Mobile
+      final ImagePixels =
+          await getImageDimensions('assets/P${images[currentImageIndex]}.png');
 
+      if (scrollController.hasClients) {
+        // currentScroll= (readOffset==false)?currentScroll:scrollController.position.maxScrollExtent*pageH*offset/ImagePixels.height/scrollController.position.maxScrollExtent;/*+75*(offset*1.19)*/
 
-      if (scrollController.hasClients){
-        // print("++++++++++++++++$offset");
-        // print("---------------------------------${scrollController.position.maxScrollExtent}");
-        // print("////////////////////////////////////////${ii.height}");
-        currentScroll= (readOffset==false)?currentScroll:scrollController.position.maxScrollExtent*660*offset/ii.height/*+75*(offset*1.19)*/;
-        // print("---------------------------------${currentScroll}");
+        currentScroll = (readOffset == false)
+            ? currentScroll
+            : pageH * offset / ImagePixels.height;
 
-        readOffset=false;
-        scrollController.jumpTo(currentScroll);
-        offset=0;
+        scrollController
+            .jumpTo(currentScroll * scrollController.position.maxScrollExtent);
+        readOffset = false;
+        offset = 0;
       }
     });
   }
+  void pauseScrolling() {
+    updateScroll();
+    if (isScrolling)  {
+      isScrolling = !isScrolling;
+      _scrollTimer?.cancel();
+    }
+
+    emit(ScrollingImageState());
+  }
+
 
   void toggleScrolling() {
     isScrolling = !isScrolling;
-    print(scrollController.offset);
     updateScroll();
     if (isScrolling) {
       startScrolling();
@@ -203,76 +314,69 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
     return frame.image;
   }
 
-
-
   Future<void> startScrolling() async {
     _scrollTimer?.cancel();
 
     restoreScrollPosition();
 
-    if (scrollSpeed >= 0 )
-    {
-      _scrollTimer = Timer.periodic(const Duration(milliseconds: 50), (timer)
-      {
-        if (scrollController.hasClients)
-        {
-        if(isScrolling) {
+    if (scrollSpeed >= 0) {
+      _scrollTimer = Timer.periodic(const Duration(milliseconds: 50), (timer) {
+        if (scrollController.hasClients) {
+          if (isScrolling) {
+            //print("always here");
             scrollController.animateTo(
-              scrollController.offset + (scrollSpeed *speedFactor),
+              scrollController.offset + (scrollSpeed * speedFactor),
+//              scrollController.offset + (scrollSpeed *speedFactor*speedratio),
               duration: const Duration(milliseconds: 50),
               curve: Curves.linear,
             );
             updateScroll();
           }
         }
-
       });
     }
-
   }
 
-  String pageData(){
-    if (scrollController.hasClients)
-    {
-      return "P" +images[currentImageIndex].toString()+",ص ${((scrollController.position.maxScrollExtent-scrollController.offset)/963).toStringAsFixed(0) } ,${((scrollController.position.maxScrollExtent-scrollController.offset)/(scrollSpeed*speedFactor*865.3)).toStringAsFixed(1)} د ";
+  String pageData() {
+    updateScroll();
+    if (scrollController.hasClients) {
+      return "P" +
+          images[currentImageIndex].toString() +
+          ",ص ${((scrollController.position.maxScrollExtent - scrollController.offset) / 963).toStringAsFixed(0)} ,${((scrollController.position.maxScrollExtent - scrollController.offset) / (scrollSpeed * speedFactor * speedratio * 865.3)).toStringAsFixed(1)} د ";
     }
-    return "P"+images[currentImageIndex].toString();
+    return "P" + images[currentImageIndex].toString();
   }
 
   void updateScroll() {
     if (scrollController.hasClients) {
-      currentScroll = scrollController.offset;
-      readOffset=false;
+      currentScroll =
+          scrollController.offset / scrollController.position.maxScrollExtent;
+      readOffset = false;
+      //print("updateScroll__________SSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSSS");
     }
   }
 
-  void updateScrollSpeed(double speed)
-  {
+  void updateScrollSpeed(double speed) {
     scrollSpeed = speed;
     updateScroll();
     emit(ScrollingImageState());
-
   }
 
-  Map<String ,int> pageBlock(int a){
-    Map<String, int> myMap = {
-      "pageIndex": -1,
-      "offset":-1
-    };
-    if(a>604||a<1)
-      return myMap;
+  Map<String, int> pageBlock(int a) {
+    Map<String, int> myMap = {"pageIndex": -1, "offset": -1};
+    if (a > 604 || a < 1) return myMap;
     int i;
-    for (i=0;i<images.length;i++)
-    {
-      if(a<images[i]){
+    for (i = 0; i < images.length; i++) {
+      if (a < images[i]) {
         break;
       }
     }
 
-    myMap["pageIndex"]=i-1;
-    myMap["offset"]=a-images[i-1];
+    myMap["pageIndex"] = i - 1;
+    myMap["offset"] = a - images[i - 1];
     return myMap;
   }
+
   String getPureArabicWord(String str1) {
     String xx = str1;
 
@@ -285,26 +389,22 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
     xx = xx.replaceAll("آ", "ا");
     xx = xx.replaceAll("ة", "ه");
     xx = xx.replaceAll("ى", "ي");
-    xx = xx.replaceAll(String.fromCharCode(170), "ه"); // U+00AA: feminine ordinal indicator
+    xx = xx.replaceAll(
+        String.fromCharCode(170), "ه"); // U+00AA: feminine ordinal indicator
 
     return xx;
   }
 
   //-----------------  search function
   void setImageIndex(String searchString) {
-    int? inputPage=-1;
-    int? index=-1 ;
+    int? inputPage = -1;
+    int? index = -1;
     if (!searchString.isEmpty) {
-      if (muqantarinStart.containsKey(searchString.toUpperCase()))
-      {
-        inputPage =  muqantarinStart[searchString.toUpperCase()];
-      }
-      else if(suraMap.containsKey(getPureArabicWord(searchString)))
-      {
-        inputPage =  suraMap[getPureArabicWord(searchString)];
-      }
-      else
-      {
+      if (muqantarinStart.containsKey(searchString.toUpperCase())) {
+        inputPage = muqantarinStart[searchString.toUpperCase()];
+      } else if (suraMap.containsKey(getPureArabicWord(searchString))) {
+        inputPage = suraMap[getPureArabicWord(searchString)];
+      } else {
         try {
           inputPage = int.parse(searchString);
         } catch (e) {
@@ -312,41 +412,39 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
         }
       }
     }
-    if (inputPage != -1 && inputPage!=null)
-    {
-      Map<String ,int> myMap=pageBlock(inputPage);
+    if (inputPage != -1 && inputPage != null) {
+      Map<String, int> myMap = pageBlock(inputPage);
       index = myMap["pageIndex"];
-      offset=myMap["offset"]!;
-      readOffset=true;
+      offset = myMap["offset"]!;
+      readOffset = true;
     }
 
-    if (index != -1&&index!=null) {
-      isScrolling=false;
+    if (index != -1 && index != null) {
+      isScrolling = false;
       currentImageIndex = index;
       textController.clear();
       emit(ScrollingImageState());
-
     }
   }
 
   void nextImage() {
-    currentScroll=0;
-    readOffset=false;
-    offset=0;
-    isScrolling=false;
-    currentImageIndex= (currentImageIndex + 1) % images.length;
+    currentScroll = 0;
+    readOffset = false;
+    offset = 0;
+    isScrolling = false;
+    currentImageIndex = (currentImageIndex + 1) % images.length;
     textController.clear();
     emit(ScrollingImageState());
   }
 
   void lastImage() {
-    currentScroll=0;
-    readOffset=false;
-    offset=0;
-    isScrolling=false;
+    currentScroll = 0;
+    readOffset = false;
+    offset = 0;
+    isScrolling = false;
     int newIndex = currentImageIndex - 1;
     if (newIndex < 0) newIndex = images.length - 1;
-    currentImageIndex= newIndex;
+    currentImageIndex = newIndex;
     textController.clear();
     emit(ScrollingImageState());
   }
@@ -358,7 +456,6 @@ class ScrollingImageCubit extends Cubit<ScrollingImageState> {
     scrollController.dispose();
     return super.close();
   }
+
 }
-
-
 class ScrollingImageState {}

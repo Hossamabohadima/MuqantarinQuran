@@ -1,34 +1,34 @@
 import 'package:flutter/material.dart';
 import 'package:flutter_bloc/flutter_bloc.dart';
 import 'ScrollingImageCubit.dart' ;
+import 'UpdateCubite.dart';
 
 class ScrollingImageScreen extends StatelessWidget {
   const ScrollingImageScreen({super.key});
   @override
   Widget build(BuildContext context) {
-    return BlocProvider(
-      create: (BuildContext context) => ScrollingImageCubit(),
-      child: BlocBuilder<ScrollingImageCubit, ScrollingImageState>(
+     return MultiBlocProvider(
+        providers: [
+          BlocProvider(create: (context) => ScrollingImageCubit()),
+          BlocProvider(create: (context) => UpdateCubit(context.read<ScrollingImageCubit>())),
+        ],
+        child: BlocBuilder<ScrollingImageCubit, ScrollingImageState>(
         builder: (context, state) {
-          final cubit = context.read<ScrollingImageCubit>();
-          final image = cubit.image;
-          cubit.startScrolling();
+        final cubit = context.read<ScrollingImageCubit>();
 
-
+      final image = cubit.image;
+      cubit.startScrolling();
           return Scaffold(
               body: GestureDetector(
+                onTap: () => cubit.pauseScrolling(),
                 child: OrientationBuilder(
                   builder: (context, orientation) {
-                    // if (orientation == Orientation.portrait) {
-                    //   return SizedBox(
-                    //           width: MediaQuery.of(context).size.width,
-                    //           height: MediaQuery.of(context).size.height,
-                    //           child: Image.asset(
-                    //             'assets/Index.png',
-                    //             fit: BoxFit.fill,
-                    //           ),
-                    //   );
-                    // } else {
+                    cubit.speedratio= (orientation != Orientation.portrait)?1:0.5;
+
+                    Future.delayed(Duration(milliseconds: 50), ()  {
+                      cubit.restoreScrollPosition();
+
+                    });
                     return Column(
                       children: [
                         Expanded(
@@ -44,8 +44,10 @@ class ScrollingImageScreen extends StatelessWidget {
                           ),
                         ),
                         Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
+                          padding: const EdgeInsets.all(0.0),
+                          child: SizedBox(
+                    height: 30,
+                    child: Row(
                             mainAxisAlignment: MainAxisAlignment.spaceBetween,
                             children: [
                               (orientation != Orientation.portrait)?ElevatedButton(
@@ -73,51 +75,75 @@ class ScrollingImageScreen extends StatelessWidget {
                                 },
                                 child: Icon(cubit.isScrolling ? Icons.pause : Icons.play_arrow,color: Colors.blue,), // Change icon based on state
                               ):SizedBox.shrink(),
-                              SizedBox(
-                                width: 200,
-                                child: TextField(
-                                  controller: cubit.textController,
-                                  decoration:  InputDecoration(
-                                    hintText: cubit.pageData(),
-                                    border: OutlineInputBorder(),
-                                  ),
-                                  onSubmitted: (value) {
-                                    cubit.setImageIndex(value);
-                                  },
-                                ),
+                              BlocBuilder<UpdateCubit, UpdateState>(
+                                builder: (context, updateState) {
+                                  return SizedBox(
+                                    width: 200,
+                                    height: 40,
+                                    child: TextField(
+                                      controller: cubit.textController,
+                                      decoration: InputDecoration(
+                                        contentPadding: EdgeInsets.only(bottom: 8),
+                                        hintText: updateState.text, // ✅ using dynamic hint
+                                        border: OutlineInputBorder(),
+                                      ),
+                                      onSubmitted: (value) {
+                                        cubit.setImageIndex(value);
+                                      },
+                                    ),
+                                  );
+                                },
                               ),
+                              (orientation != Orientation.portrait)?ElevatedButton(
+                                onPressed: () {
+                                  Navigator.pushNamed(context, '/Help'); // Toggle play/pause
+                                },
+                                child: Icon(Icons.help), // Change icon based on state
+                              ):SizedBox.shrink(),
                               (orientation != Orientation.portrait)? ElevatedButton(
 
                                 onPressed: () => cubit.lastImage(),
                                 child: const Icon(Icons.arrow_right),
                               ):SizedBox.shrink(),
+
                             ],
                           ),
-                        ),
+                        )),
                         (orientation == Orientation.portrait)? Padding(
-                          padding: const EdgeInsets.all(8.0),
-                          child: Row(
-                            mainAxisAlignment: MainAxisAlignment.spaceBetween,
-                            children: [
-                              ElevatedButton(
-                                onPressed: () => cubit.nextImage(),
-                                child: const Icon(Icons.arrow_left),
-                              ),
-
-                              ElevatedButton(
-                                onPressed: () {
-                                  cubit.toggleScrolling(); // Toggle play/pause
-                                },
-                                child: Icon(cubit.isScrolling ? Icons.pause : Icons.play_arrow,color: Colors.blue,), // Change icon based on state
-                              ),
-                              ElevatedButton(
-
-                                onPressed: () => cubit.lastImage(),
-                                child: const Icon(Icons.arrow_right),
-                              ),
-                            ],
+                          padding: const EdgeInsets.all(0.0),
+                          child: SizedBox(
+                            height: 30,
+                            child: Row(
+                              mainAxisAlignment: MainAxisAlignment.spaceBetween,
+                              children: [
+                                ElevatedButton(
+                                  onPressed: () => cubit.nextImage(),
+                                  child: const Icon(Icons.arrow_left),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    cubit.toggleScrolling();
+                                  },
+                                  child: Icon(
+                                    cubit.isScrolling ? Icons.pause : Icons.play_arrow,
+                                    color: Colors.blue,
+                                  ),
+                                ),
+                                ElevatedButton(
+                                  onPressed: () {
+                                    Navigator.pushNamed(context, '/Help'); // Toggle play/pause
+                                  },
+                                  child: Icon(Icons.help), // Change icon based on state
+                                ),
+                                ElevatedButton(
+                                  onPressed: () => cubit.lastImage(),
+                                  child: const Icon(Icons.arrow_right),
+                                ),
+                                ],
+                            ),
                           ),
-                        ):SizedBox.shrink(),
+                        )
+                            :SizedBox.shrink(),
                       ],
                     );
                     // }

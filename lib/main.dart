@@ -1,11 +1,11 @@
 import 'package:flutter/material.dart';
+import 'HelpScreen.dart';
 
 import 'ScrollingImageScreen.dart';
 
-
 void main() {
   runApp(MyApp());
-  }
+}
 
 class MyApp extends StatelessWidget {
   @override
@@ -14,9 +14,9 @@ class MyApp extends StatelessWidget {
       debugShowCheckedModeBanner: false,
       routes: {
         "/ScrollingImageScreen": (context) => ScrollingImageScreen(),
+        '/Help': (context) => HelpScreen(),
       },
       initialRoute: "/ScrollingImageScreen",
     );
   }
 }
-
